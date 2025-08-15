@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jogo da Memória - Esportes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    #moves {
+      margin-bottom: 20px;
+    }
+    .game-board {
+      display: grid;
+      grid-template-columns: repeat(10, 80px);
+      grid-gap: 10px;
+      justify-content: center;
+    }
+    .card {
+      width: 80px;
+      height: 80px;
+      perspective: 600px;
+      cursor: pointer;
+    }
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transform-style: preserve-3d;
+      transition: transform 0.5s;
+    }
+    .card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 8px;
+    }
+    .card-front {
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #ccc;
+      transform: rotateY(180deg);
+    }
+    .card-front img {
+      width: 70%;
+      height: 70%;
+      object-fit: contain;
+    }
+    .card-back {
+      background: #1976d2;
+      border: 2px solid #0d47a1;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1565c0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Jogo da Memória - Esportes</h1>
+  <div id="moves">Movimentos: 0</div>
+  <div class="game-board" id="gameBoard"></div>
+  <button onclick="restartGame()">Reiniciar</button>
+
+  <script>
+    const totalPairs = 25;
+    let moves = 0;
+    let firstCard = null;
+    let lockBoard = false;
+
+    function createBoard() {
+      const gameBoard = document.getElementById('gameBoard');
+      gameBoard.innerHTML = '';
+      moves = 0;
+      document.getElementById('moves').innerText = `Movimentos: ${moves}`;
+
+      // Criar array de imagens duplicadas
+      const images = [];
+      for (let i = 1; i <= totalPairs; i++) {
+        images.push(`images/img${i}.png`);
+        images.push(`images/img${i}.png`);
+      }
+
+      // Embaralhar
+      images.sort(() => Math.random() - 0.5);
+
+      // Criar cartas
+      images.forEach(src => {
+        const card = document.createElement('div');
+        card.classList.add('card');
+        card.innerHTML = `
+          <div class="card-inner">
+            <div class="card-front">
+              <img src="${src}" alt="Esporte">
+            </div>
+            <div class="card-back"></div>
+          </div>
+        `;
+        card.addEventListener('click', () => flipCard(card));
+        gameBoard.appendChild(card);
+      });
+    }
+
+    function flipCard(card) {
+      if (lockBoard || card.classList.contains('flipped')) return;
+
+      card.classList.add('flipped');
+
+      if (!firstCard) {
+        firstCard = card;
+        return;
+      }
+
+      moves++;
+      document.getElementById('moves').innerText = `Movimentos: ${moves}`;
+
+      const firstImg = firstCard.querySelector('img').src;
+      const secondImg = card.querySelector('img').src;
+
+      if (firstImg === secondImg) {
+        firstCard = null;
+      } else {
+        lockBoard = true;
+        setTimeout(() => {
+          firstCard.classList.remove('flipped');
+          card.classList.remove('flipped');
+          firstCard = null;
+          lockBoard = false;
+        }, 1000);
+      }
+    }
+
+    function restartGame() {
+      createBoard();
+    }
+
+    createBoard();
+  </script>
+</body>
+</html>
